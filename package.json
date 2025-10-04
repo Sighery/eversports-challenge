@@ -8,8 +8,8 @@
     "build": "tsc",
     "serve": "node dist/index.js",
     "test": "jest",
-    "lint": "eslint --ext .ts src/.",
-    "format": "prettier --write \"src/**/*.ts\""
+    "lint": "eslint --ext .ts src/. tests/.",
+    "format": "prettier --write \"(src|tests)/**/*.ts\""
   },
   "author": "",
   "license": "ISC",
