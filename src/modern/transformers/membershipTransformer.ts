@@ -1,5 +1,7 @@
 import { Membership } from "../models/membershipModel";
+import { MembershipView } from "../views/json/membershipsView";
 import {
+  toISODate,
   parseMembershipState,
   parsePaymentMethod,
   parseBillingInterval,
@@ -19,5 +21,13 @@ export function parseMembership(raw: Record<string, unknown>): Membership {
     paymentMethod: parsePaymentMethod(raw.paymentMethod),
     billingInterval: parseBillingInterval(raw.billingInterval),
     billingPeriods: Number(raw.billingPeriods),
+  };
+}
+
+export function transformToMembershipView(source: Membership): MembershipView {
+  return {
+    ...source,
+    validFrom: toISODate(source.validFrom),
+    validUntil: toISODate(source.validUntil),
   };
 }

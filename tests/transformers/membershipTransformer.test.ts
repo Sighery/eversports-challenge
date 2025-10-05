@@ -1,5 +1,9 @@
-import { parseMembership } from "../../src/modern/transformers/membershipTransformer";
+import {
+  parseMembership,
+  transformToMembershipView,
+} from "../../src/modern/transformers/membershipTransformer";
 import memberships from "../../src/data/memberships.json";
+import { Membership } from "../../src/modern/models/membershipModel";
 import {
   BillingIntervalEnum,
   MembershipStateEnum,
@@ -20,6 +24,41 @@ describe("parseMembership", () => {
       recurringPrice: 150.0,
       validFrom: new Date("2023-01-01T00:00:00.000Z"),
       validUntil: new Date("2023-12-31T00:00:00.000Z"),
+      state: MembershipStateEnum.Active,
+      assignedBy: "Admin",
+      paymentMethod: PaymentMethodEnum.CreditCard,
+      billingInterval: BillingIntervalEnum.Monthly,
+      billingPeriods: 12,
+    });
+  });
+});
+
+describe("transformToMembershipView", () => {
+  it("transforms source model into view model", () => {
+    const input: Membership = {
+      id: 1,
+      uuid: "123e4567-e89b-12d3-a456-426614174000",
+      name: "Platinum Plan",
+      userId: 2000,
+      recurringPrice: 150.0,
+      validFrom: new Date("2023-01-01T00:00:00.000Z"),
+      validUntil: new Date("2023-12-31T00:00:00.000Z"),
+      state: MembershipStateEnum.Active,
+      assignedBy: "Admin",
+      paymentMethod: PaymentMethodEnum.CreditCard,
+      billingInterval: BillingIntervalEnum.Monthly,
+      billingPeriods: 12,
+    };
+    const result = transformToMembershipView(input);
+
+    expect(result).toEqual({
+      id: 1,
+      uuid: "123e4567-e89b-12d3-a456-426614174000",
+      name: "Platinum Plan",
+      userId: 2000,
+      recurringPrice: 150.0,
+      validFrom: "2023-01-01",
+      validUntil: "2023-12-31",
       state: MembershipStateEnum.Active,
       assignedBy: "Admin",
       paymentMethod: PaymentMethodEnum.CreditCard,
