@@ -1,120 +1,134 @@
+[![CI](https://github.com/Sighery/eversports-challenge/actions/workflows/check.yaml/badge.svg)][CI]
+
 # Fullstack Interview Challenge
 
-> [!IMPORTANT]
-> You should have received a google doc together with this repository that explains in detail the scope and context of the exercise, together with it's acceptance criteria and any other necessary information for the completion of the challenge.
+I've moved the existing README into INSTRUCTIONS.md and I'll use this document
+to provide a quick usage refresher, as well as document my implementation
+choices in the Task 1 and Task 2 problems.
 
-## Context
+# Task 1
 
-You are working in the product team at eversports that is maintaining the eversports manager. You and your team are working on a bunch of features around memberships within the current quarter.
+## Usage
 
-The team also started an initiative in this quarter to modernize the codebase by refactoring features implemented in an old technology stack to a more modern one.  
-
-### Domain: Memberships
-
-A `Membership` allows a user to participate at any class the a specific sport venue within a specific timespan. Within this timespan, the membership is divided into `MembershipPeriods`. The MembershipPeriods represent billing periods that the user has to pay for.
-
-For the scope of this exercise, the domain model was reduced to a reasonable size. 
-
-#### Entity: Membership
-```ts
-interface Membership {
-    name: string // name of the membership
-    user: number // the user that the membership is assigned to
-    recurringPrice: number // price the user has to pay for every period
-    validFrom: Date // start of the validity
-    validUntil: Date // end of the validity
-    state: string // indicates the state of the membership
-    paymentMethod: string // which payment method will be used to pay for the periods
-    billingInterval: string // the interval unit of the periods
-    billingPeriods: number // the number of periods the membership has
-}
-```
-
-#### Entity: MembershipPeriod
-```ts
-interface MembershipPeriod {
-    membership: number // membership the period is attached to
-    start: Date // indicates the start of the period
-    end: Date // indicates the end of the period
-    state: string
-}
-```
-
-
-## Task 1 - Modernization of the membership codebase (backend only)
-
-Before your team can start to implement new features, you guys decided to **modernize the backend codebase** first.
-
-Your task is to **refactor two endpoints** implemented in the **legacy codebase** that can be used to list and create memberships:
-
-GET /legacy/memberships (`src/legacy/routes/membership.routes.js`)
-POST /legacy/memberships (`src/legacy/routes/membership.routes.js`)
-
-Your new implementation should be accessible through new endpoints in the **modern codebase** that are already prepared:
-
-GET /memberships (`src/modern/routes/membership.routes.ts`)
-POST /memberships (`src/modern/routes/membership.routes.ts`)
-
-When refactoring, you should consider the following aspects:
-
-- The response from the endpoints should be exactly the same. Use the same error messages that are used in the legacy implementation.
-- You write read- and maintainable code
-- You use Typescript instead of Javascript to enabled type safety
-- Your code is separated based on concerns
-- Your code is covered by automated tests to ensure the stability of the application
-
-> [!NOTE]
-> For the scope of this task, the data used is mocked within the json files `membership.json` and `membership-periods.json`
-
-> [!NOTE]
-> We provided you with an clean express.js server to run the example. For your implementations, feel free to use any library out there to help you with your solution. If you decide to choose another JavaScript/TypeScript http library/framework (eg. NestJs) update the run config described below if needed, and ensure that the routes of the described actions don't change.
-
-
-## Task 2 - Design an architecture to provide a membership export (conception only)
-
-The team discovered that users are interested in **exporting all of their memberships** from the system to run their own analysis once a month as a **CSV file**. Because the creation of the export file would take some seconds, the team decided to go for an **asynchronous process** for creating the file and sending it via email. The process will be triggered by an API call of the user. 
-
-Your task is to **map out a diagram** that visualizes the asynchronous process from receiving the request to sending the export file to the user. This diagram should include all software / infrastructure components that will be needed to make the process as stable and scalable as possible. 
-
-Because the team has other things to work on too, this task is timeboxed to **1 hour** and you should share the architecture diagram as a **PDF file**.
-
-> [!NOTE]
-> Feel free to use any tool out there to create your diagram. If you are not familiar with such a tool, you can use www.draw.io. 
-
-## Repository Intro
-In this repository you will find an plain express.js server the exposes API endpoints to consumers. For this exercise, the API endpoints are not protected.
-
-### Installation
+Usage remains exactly as before as I've went with the existing dependencies,
+only adding new functionality and commands, not removing. Nevertheless, here
+is a quick overview:
 
 ```sh
+# Installation
 npm install
-```
 
-### Usage
-
-```sh
+# Serving the backend
 npm run start
-```
 
-### Run test
-```sh
+# Build
+npm run build
+
+# Format
+npm run format
+
+# Lint
+npm run lint
+
+# Test
 npm run test
 ```
 
-## 🗒️ Conditions
+## Architecture
 
-- You will have multiple days for the challenge, but most of our candidates spend around **8h to 10h** on this assignment.
-- You should put your code in GitHub or GitLab/Bitbucket and send us the link to your repository where we can find the source code. That means no ZIP files.
-- Please make sure to include any additional instructions in a readme in case you change something about the compilation or execution of the codebase.
+I decided to go with a MVC (Model-View-Controller) architecture, and mostly
+stuck to the existing dependencies.
 
-## 💻 Technologies:
+Broadly, these are the components I settled on:
+* `models`: Database (or in this case JSON) schemas
+* `views`: Presentation layer. Only JSON is currently implemented but 
+  extensible to other formats
+* `controllers`: Handling of incoming requests
+* `dtos`: Data transfer objects (models) used in different HTTP requests
+* `routes`: Thin layer registering the routes and calling appropriate
+  controllers
+* `repositories`: Encapsulates access to the different storages, in this case
+  just our JSON files, but extensible enough to support actual DB access
+* `services`: Some business logic that doesn't belong in controllers, like
+  merging/fetching memberships along their membership periods together.
+* `transformers`: Different parsers and validators for converting between
+  different models, such as models from the `models` layer into `views` layer
+  models, or `models` -> `dtos`, etc
 
-We believe that great developers are not bound to a specific technology set, but no matter their toolbox they are able to think critically about how to structure and design good code. For this exercise, we provided just a small and simple set of tools to run the a application and tests. Feel free to use any library out there to help you with your implementation.
+Here is a high-level diagram overview of the code flow when a request comes
+in:
 
-### Pre-installed
+![Backend Architecture](docs/backend-architecture.png)
 
-- Express - https://expressjs.com/
-- TypeScript - https://www.typescriptlang.org/
-- Jest - https://jestjs.io/
+### Testing/linting/formatting
 
-Best of luck and looking forward to what you are able to accomplish! 🙂
+Since I'm new to Typescript, I decided to go with the existing testing
+framework (`jest`). I've implemented unit tests for the `transformers` and
+`repositories` layer, and the rest of the layers are tested indirectly through
+a whole flow (from the route through `supertest`) integration test. I could
+have also written unit tests for the `services` layer, but in this case I saw
+little value over just testing it through the route integration tests.
+
+For formatting I set up `prettier`, and for linting `eslint`. These are now
+set up as commands in the `package.json`.
+
+### CI
+
+CI has been set up with Github Actions. Right now this CI will just
+automatically check linting/formatting/testing/building. In a proper project,
+this would be expanded to apply to Pull Requests instead, and then the `main`
+branch pushes would do something useful with the build result, like pushing it
+to our server running the backend.
+
+### Concerns
+
+There are a few possible issues I found while trying to migrate this codebase,
+mostly relating to the JSON schemas, as well as the `POST /memberships` code.
+I've marked these with `NOTE` comments throughout the code, but I'll also
+write them down here to provide a bit more context.
+
+#### Membership entity: user
+
+The README mentions this `user` field, but the JSON files use `userId`
+instead, while the legacy `POST` code sets it to `user`. For my
+implementation, it internally uses `userId`, but in the API response will
+expose only `user` as expected to maintain backwards compatibility.
+
+#### Membership entity: assignedBy
+
+The README doesn't mention this `assignedBy` field, but the JSON files contain
+it, and the legacy `GET` does return it in the API response. For my
+implementation, I've valued backwards compatibility over everything and
+decided to include it.
+
+#### MembershipPeriod entity: membership/membershipId
+
+The README only mentions a `membership` field. Likewise, the JSON file only
+contains the `membership` field. However, the legacy `POST` code sets
+`membershipId`, and that's what it will return in the API response. For my
+implementation, I've valued backwards compatibility over everything and
+decided to include it.
+
+#### POST /memberships: billingPeriodsLessThan3Years error
+
+The legacy `POST` code will trigger this error when the billing interval is
+set to yearly, and the period is set to bigger than 3, but smaller than 10.
+This doesn't match the error message, but for my implementation I've decided
+to replicate it to maintain backwards compatibility.
+
+#### POST /memberships: cashPriceBelow100 error
+
+The legacy `POST` code will trigger this error when the `paymentMethod` is set
+to `cash` **and** the `recurringPrice` is over `100`, which seems to
+contradict the error message. For my implementation I've decided to replicate
+it to maintain backwards compatibility.
+
+#### POST /memberships: unreachable weekly intervals
+
+The legacy `POST` code has a validation check for `monthly` and `yearly`
+intervals, and an else for any other value that will raise
+`invalidBillingPeriods`. That means that the `weekly` interval will always be
+invalid. I've decided to replicate this behaviour regardless to maintain
+backwards compatibility.
+
+[CI]: https://github.com/Sighery/eversports-challenge/actions
