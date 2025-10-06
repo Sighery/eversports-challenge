@@ -9,7 +9,8 @@
     "serve": "node dist/index.js",
     "test": "jest",
     "lint": "eslint --ext .ts src/. tests/.",
-    "format": "prettier --write \"(src|tests)/**/*.ts\""
+    "format": "prettier --write \"(src|tests)/**/*.ts\"",
+    "format:ci": "prettier --check \"(src|tests)/**/*.ts\""
   },
   "author": "",
   "license": "ISC",

@@ -1,0 +1,33 @@
+name: Check
+
+on: [push]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Setup NodeJS
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24.x"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check format
+        run: npm run format:ci
+
+      - name: Check linting
+        run: npm run lint
+
+      - name: Check tests
+        run: npm run test
+
+      - name: Check build
+        run: npm run build
