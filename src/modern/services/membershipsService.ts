@@ -3,6 +3,8 @@ import { MembershipPeriodsRepository } from "../repositories/membershipPeriodsRe
 import { MembershipWithPeriodsView } from "../views/json/membershipsView";
 import { transformToMembershipView } from "../transformers/membershipTransformer";
 import { transformToMembershipPeriodView } from "../transformers/membershipPeriodTransformer";
+import { Membership } from "../models/membershipModel";
+import { MembershipPeriod } from "../models/membershipPeriodModel";
 
 export class MembershipsService {
   constructor(
@@ -25,5 +27,19 @@ export class MembershipsService {
     }
 
     return result;
+  }
+
+  async getMembershipsCount(): Promise<number> {
+    return this.membershipsRepo.getCount();
+  }
+
+  async addMembership(newModel: Membership): Promise<Membership> {
+    return this.membershipsRepo.save(newModel);
+  }
+
+  async addMembershipPeriod(
+    newModel: MembershipPeriod,
+  ): Promise<MembershipPeriod> {
+    return this.membershipPeriodsRepo.save(newModel);
   }
 }

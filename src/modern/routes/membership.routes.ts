@@ -1,12 +1,12 @@
-import express, { Request, Response } from "express";
-import { getMemberships } from "../controllers/membershipsController";
+import express from "express";
+import {
+  getMemberships,
+  postMembership,
+} from "../controllers/membershipsController";
 
 const router = express.Router();
 
 router.get("/", getMemberships);
-
-router.post("/", (req: Request, res: Response) => {
-  throw new Error("not implemented");
-});
+router.post("/", postMembership);
 
 export default router;
